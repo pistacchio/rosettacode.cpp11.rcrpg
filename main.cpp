@@ -55,6 +55,41 @@ static const std::map<std::string, Item> String_items {
     {"gold",   GOLD}
 };
 
+/////////////
+// Aliases //
+/////////////
+
+std::map<std::string, std::string> Aliases {
+    {"i", "inventory"},
+    {"n", "north"},
+    {"e", "east"},
+    {"w", "west"},
+    {"s", "south"},
+    {"get", "take"},
+    {"u", "up"},
+    {"l", "look"},
+    {"d", "down"}
+};
+std::string unalias(std::string term) {
+    if (Aliases.find(term) == Aliases.end()) {
+        return term;
+    } else {
+        return Aliases.find(term)->second;
+    }
+}
+void list_aliases() {
+    std::cout << "Current aliases are:" << std::endl;
+    for_each(Aliases.begin(), Aliases.end(), [](std::pair<std::string, std::string> alias){
+        std::cout << alias.first << " -> " << alias.second << std::endl;
+    });
+}
+void add_alias(std::string alias, std::string command) {
+    if (Aliases.find(alias) == Aliases.end()) {
+        Aliases[alias] = command;
+    }
+
+}
+
 //////////////
 // Location //
 //////////////
@@ -78,11 +113,6 @@ bool operator< (const Location& left,  const Location& right) {
     return std::to_string(left.x) + '-' + std::to_string(left.y) + '-' + std::to_string(left.z) <
     std::to_string(right.x) + '-' + std::to_string(right.y) + '-' + std::to_string(right.z);
 }
-
-// std::ostream& operator<<(std::ostream& str, location const& l) {
-//     str << "(" << l.x << ", " << l.y << ", " << l.z << ")";
-//     return str;
-// }
 
 ///////////////
 // Direction //
@@ -290,7 +320,7 @@ public:
             cmd.push_back(sm.str());
         });
         
-        std::string action {cmd.front()};
+        std::string action {unalias(cmd.front())};
         
         if (action == "help") {
             print_help();
@@ -400,6 +430,15 @@ public:
                         std::cout << "You don't have it" << std::endl;
                     }
                 }
+            }
+        } else if (action == "alias") {
+            if (cmd.size() == 1) {
+                list_aliases();
+            } else if (cmd.size() == 3) {
+                add_alias(cmd[1], cmd[2]);
+                std::cout << "Alias added" << std::endl;
+            } else {
+                std::cout << "The correct use is: alias <ALIAS> <COMMAND>" << std::endl;
             }
         } else {
             std::cout << "Hm?! What do you mean?" << std::endl;
