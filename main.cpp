@@ -15,12 +15,14 @@
 #include <regex>
 #include <vector>
 
+// Initialize the randomization engine
 std::default_random_engine rnd_eng(std::random_device{}());
 
 //////////////////
 // String utils //
 //////////////////
 
+// Concats string in a nice readable format adding "," and "and"
 std::string descriptive_join(const std::vector<std::string>& items) {
     std::string desc;
     std::vector<std::string> itms {items.begin(), items.end()};
@@ -131,6 +133,7 @@ static const std::map<std::string, Location> Direction {
 // Interface Item Container //
 //////////////////////////////
 
+// Inherited by Player and Room, both need a way to contain items
 class IItemContainer {
 public:
     bool has_item(const Item item) const {
@@ -322,8 +325,11 @@ public:
         
         std::string action {unalias(cmd.front())};
         
+        // HELP
         if (action == "help") {
             print_help();
+        
+        // MOVE (Up, Down, North etc)
         } else if (Direction.find(action) != Direction.end()) {
             Location direction {Direction.find(action)->second};
             Location location {direction + player.get_current_location()};
@@ -339,8 +345,12 @@ public:
             } else {
                 std::cout << "There's no exit in that direction!" << std::endl;
             }
+            
+        // LOOK and describe the room
         } else if (action == "look") {
             std::cout << world.room_at(player.get_current_location()).describe(world.adjacent_directions(player.get_current_location()));
+        
+        // DIG towards a direction
         } else if (action == "dig") {
             if (cmd.size() != 2) {
                 std::cout << "Where do you want to dig?" << std::endl;
@@ -359,6 +369,8 @@ public:
                     }
                 }
             }
+        
+        // DROP an item or all in the inventory
         } else if (action == "drop") {
             if (cmd.size() == 1) {
                 std::cout << "Drop what?" << std::endl;
@@ -380,6 +392,8 @@ public:
                     }
                 }
             }
+        
+        // TAKE an item from the room or all of them
         } else if (action == "take" ) {
             if (cmd.size() == 1) {
                 std::cout << "Take what?" << std::endl;
@@ -401,8 +415,12 @@ public:
                     }
                 }
             }
+        
+        // INVENTORY listing
         } else if (action == "inventory") {
             std::cout << player.inventory() << std::endl;
+        
+        // EQUIP an item currently in the inventory
         } else if (action == "equip") {
             if (cmd.size() == 1) {
                 std::cout << "What do you want to equip?" << std::endl;
@@ -417,6 +435,8 @@ public:
                     }
                 }
             }
+        
+        // UNEQUIP an item currently equipped
         } else if (action == "unequip") {
             if (cmd.size() == 1) {
                 std::cout << "What do you want to unequip?" << std::endl;
@@ -431,6 +451,8 @@ public:
                     }
                 }
             }
+        
+        // ALIAS a command, or list the aliases
         } else if (action == "alias") {
             if (cmd.size() == 1) {
                 list_aliases();
@@ -440,6 +462,8 @@ public:
             } else {
                 std::cout << "The correct use is: alias <ALIAS> <COMMAND>" << std::endl;
             }
+        
+        // WHAT?! A command that is not undertood by this simplistic parser
         } else {
             std::cout << "Hm?! What do you mean?" << std::endl;
         }
@@ -476,7 +500,6 @@ int main()
     }
     
     std::cout << "See you next time!" << std::endl;
-    
     
     return 0;
 }
